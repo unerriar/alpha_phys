@@ -1,0 +1,59 @@
+{% extends 'students/base_students.html' %}
+
+{% load static %}
+
+{% block extrahead %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/demos.css' %}">
+{% endblock %}
+
+{% block title %}Демонстрации{% endblock %}
+
+{% block content %}
+<main class="fade-in">
+  <div class="page-content">
+
+    <!-- Description wide tile -->
+    <div class="tile-wide">
+      <h1>Интерактивные демонстрации</h1>
+      <p>
+        Здесь будет собрана библиотека интерактивных физических демонстраций, которые помогут понять ключевые явления и принципы физики. Пока что этот раздел находится в разработке.
+      </p>
+    </div>
+
+    <!-- Demos grid -->
+    {% if demos %}
+      <div class="demos-grid">
+        {% for demo in demos %}
+          <a class="demo-item" href="{% url 'demo_detail' slug=demo.slug %}">
+            {% if demo.icon %}
+              <img src="{{ demo.icon.url }}" alt="{{ demo.title }}">
+            {% else %}
+              <div class="demo-placeholder">⚙️</div>
+            {% endif %}
+            <h3 class="demo-title">{{ demo.title }}</h3>
+            <p class="demo-desc">{{ demo.description|default:""|truncatewords:18 }}</p>
+            <div class="demo-meta">
+              <span class="badge">{{ demo.get_theme_display }}</span>
+              <span class="dots">
+                {% for _ in "12345"|make_list %}
+                  {% if forloop.counter <= demo.difficulty %}
+                    <span class="dot filled"></span>
+                  {% else %}
+                    <span class="dot"></span>
+                  {% endif %}
+                {% endfor %}
+              </span>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="tile-wide no-demos">
+        <p>Пока нет демонстраций.</p>
+      </div>
+    {% endif %}
+
+  </div>
+</main>
+
+{% endblock %}

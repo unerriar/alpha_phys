@@ -1,0 +1,95 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+  
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Физика{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=0.44">
+  {% block extrahead %}{%endblock%}
+</head>
+
+<body>
+  {% block nav %}{% endblock %}
+
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      function showPdf(containerId, pdfUrl, btnEl) {
+        const container = document.getElementById(containerId);
+
+        // 1. Close all other diplomas
+        document.querySelectorAll('.pdf-container').forEach(c => {
+          if (c.id !== containerId) {
+            c.classList.add('hidden');
+          }
+        });
+        // Reset other button texts
+        document.querySelectorAll('.pdf-button').forEach(b => {
+          b.textContent = b.dataset.label;
+        });
+
+        // 2. Lazy-load this one if not yet loaded
+        if (!container.dataset.loaded) {
+          const el = document.createElement('embed');
+          el.src = pdfUrl;
+          el.type = 'application/pdf';
+          el.width = '100%';
+          el.height = '600px';
+          container.appendChild(el);
+          container.dataset.loaded = 'true';
+        }
+
+        // 3. Toggle this container
+        const nowHidden = container.classList.toggle('hidden');
+        btnEl.textContent = nowHidden ? btnEl.dataset.label : 'Скрыть';
+      }
+    });
+    
+    function showPdf(containerId, pdfUrl, btnEl) {
+      const container = document.getElementById(containerId);
+      document.querySelectorAll('.pdf-container').forEach(c => {
+        if (c.id !== containerId) {
+          c.classList.add('hidden');
+        }
+      });
+      // Reset other button texts
+      document.querySelectorAll('.pdf-button').forEach(b => {
+        b.textContent = b.dataset.label;
+      });
+
+      // Lazy-load the PDF only once
+      if (!container.dataset.loaded) {
+        const el = document.createElement('embed');
+        el.src = pdfUrl;
+        el.type = 'application/pdf';
+        el.width = '100%';
+        el.height = '600px';
+        container.appendChild(el);
+        container.dataset.loaded = 'true';
+      }
+
+      // Toggle visibility
+      const nowHidden = container.classList.toggle('hidden');
+
+      // Button text: custom label when hidden, "Скрыть" when shown
+      const defaultLabel = btnEl.dataset.label || 'Показать';
+      btnEl.textContent = nowHidden ? defaultLabel : 'Скрыть';
+    }
+
+  </script>
+  <div class="contact-fab">
+    <a href="mailto:unerriar@gmail.com" class="contact-icon email" title="Email">
+      <img src="{% static 'images/email.svg' %}" alt="Email">
+    </a>
+    <a href="https://t.me/unerriar" target="_blank" class="contact-icon telegram" title="Telegram">
+      <img src="{% static 'images/telegram.png' %}" alt="Telegram">
+    </a>
+    <a href="https://wa.me/79031488319" target="_blank" class="contact-icon whatsapp" title="WhatsApp">
+      <img src="{% static 'images/whatsapp.png' %}" alt="WhatsApp">
+    </a>
+  </div>  
+</body>
+</html>

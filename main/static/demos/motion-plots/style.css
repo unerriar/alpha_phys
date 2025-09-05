@@ -1,0 +1,17 @@
+#demo-container {
+  display: flex;
+  flex-direction: column; 
+}
+
+#canvas {
+  height: 20%; /* 25% of height */
+  width: 100%;
+  background-color: #000; /* black canvas */
+  display: block;
+}
+
+#plots {
+  flex: 1; /* remaining space */
+  width: 100%;
+  min-height: 0; /* ensures proper flex scaling */
+}

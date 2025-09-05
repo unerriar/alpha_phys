@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block nav %}
+<nav class="topnav">
+  <a href="{% url 'students_materials' %}"
+    class="{% if request.path == '/students/materials/' %}active{% endif %}">Библиотека</a>
+  <a href="{% url 'demos' %}" class="{% if request.path == '/students/demos/'%}active{% endif %}">
+    Демонстрации
+  </a>
+  <a href="/">На главную</a>
+</nav>
+{% endblock %}

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <title>DjVu Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    html, body { margin:0; height:100%; }
+    #for_viewer { height:100vh; width:100vw; }
+  </style>
+  <!-- load library and viewer (same folder as this file) -->
+  <script src="djvu.js"></script>
+  <script src="djvu_viewer.js"></script>
+</head>
+<body>
+  <div id="for_viewer"></div>
+
+  <script>
+    (async function () {
+      // Get ?file=/static/pdfs/file.djvu
+      const params = new URLSearchParams(location.search);
+      const fileParam = params.get('file');
+
+      // Create and render viewer
+      const viewer = new DjVu.Viewer();
+      viewer.render(document.getElementById('for_viewer'));
+
+      // optional UI/config
+      viewer.configure({
+        language: 'ru',
+        uiOptions: { hideOpenAndCloseButtons: true } // we control files from your outer page
+      });
+
+      if (!fileParam) {
+        // show a friendly message if called without a file
+        const box = document.createElement('div');
+        box.style.cssText = 'padding:1rem;font-family:sans-serif';
+        box.textContent = 'Файл DjVu не указан.';
+        document.getElementById('for_viewer').appendChild(box);
+        return;
+      }
+
+      // Make URL absolute relative to this page’s origin
+      const url = new URL(fileParam, location.origin).toString();
+
+      try {
+        await viewer.loadDocumentByUrl(url);
+      } catch (e) {
+        console.error('DjVu load error:', e);
+        const box = document.createElement('div');
+        box.style.cssText = 'padding:1rem;font-family:sans-serif;color:#c33';
+        box.textContent = 'Не удалось загрузить DjVu-файл. Проверьте путь и доступность файла.';
+        document.getElementById('for_viewer').appendChild(box);
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block nav %}
+<nav class="topnav">
+  <a href="{% url 'parents_about' %}"
+    class="{% if request.path == '/parents/about/' %}active{% endif %}">Обо мне</a>
+  <a href="{% url 'parents_individual' %}"
+    class="{% if request.path == '/parents/individual/' %}active{% endif %}">Индивидуальные занятия</a>
+  <a href="{% url 'parents_groups' %}"
+    class="{% if request.path == '/parents/groups/' %}active{% endif %}">Малые группы</a>
+  <a href="{% url 'parents_selfstudy' %}"
+    class="{% if request.path == '/parents/selfstudy/' %}active{% endif %}">Самостоятельное обучение</a>
+  <a href="/">На главную</a>
+</nav>  
+{% endblock %}

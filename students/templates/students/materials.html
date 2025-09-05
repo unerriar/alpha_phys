@@ -1,0 +1,270 @@
+{% extends 'students/base_students.html' %}
+{% load static %}
+
+{% block extrahead %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/library.css' %}">
+{% endblock %}
+
+{% block title %}Библиотека{% endblock %}
+{% block content %}
+<main class="fade-in">
+  <div class="page-content">
+    <div class="tile-wide">
+      <h2>Любите книгу...</h2>
+
+      <p>
+        Современные технологии предоставляют доступ к большому числу видеоуроков, интерактивных курсов
+        и других средств, упрощающих процесс обучения. Хотя я одобряю хорошие интерактивные материалы и
+        разрабатываю некоторые из них сам, важно помнить, что упрощение &mdash;&nbsp;не всегда лучшее, что можно
+        сделать с обучением. Чтение книги по-прежнему остаётся одним из лучших способов глубоко и вдумчиво
+        изучить материал. Здесь вы найдёте некоторые хорошие книги под ваши задачи с краткими комментариями
+        о том, кому пригодится каждая из них. 
+      </p>
+      <p>
+        Если вы хотите глубоко и полно разобраться в физике &mdash;&nbsp;вам лучше подойдут книги из раздела
+        "классика", включающие в себя обстоятельный и серьёзный разбор физических явлений. Книги раздела
+        "современные" обычно раскрывают взаимосвязь физических явлений менее глубоко, но лучше соответствуют
+        современному устройству школьной программы в отношении порядка и состава тем, сходства задач с 
+        экзаменационными. Наконец, если у вас осталось очень мало времени (до четверти) до экзамена, и ваша
+        первоочередная задача &mdash;&nbsp;сдать его любой ценой, а уж потом разобраться в физике &mdash;&nbsp;вам
+        могут подойти интенсивы из категории "экзамены". Помните, что это крайнее средство: книжки только
+        этого типа ни в коем случае не научат вас физике как науке, но помогут разобраться с форматом ЕГЭ
+        или ОГЭ, а знания, приобретённые таким способом, забываются крайне быстро, поэтому не годятся для 
+        основательного обучения.
+      </p>
+      <div class="filters-bar">
+        <!-- Классы -->
+        <div class="filter-group">
+          <span class="filter-label">Классы:</span>
+          <button class="filter-btn " data-filter="6">≤6</button>
+          <button class="filter-btn " data-filter="7">7</button>
+          <button class="filter-btn " data-filter="8">8</button>
+          <button class="filter-btn active" data-filter="9">9</button>
+          <button class="filter-btn active" data-filter="10">10</button>
+          <button class="filter-btn active" data-filter="11">11</button>
+          <button class="filter-btn " data-filter="college">Вуз</button>
+        </div>
+
+        <!-- Эпоха -->
+        <div class="filter-group">
+          <span class="filter-label">Жанр:</span>
+          <button class="filter-btn" data-filter="classic">Классика</button>
+          <button class="filter-btn" data-filter="modern">Современные</button>
+          <button class="filter-btn" data-filter="exams">Экзамены</button>
+        </div>
+
+        <div class="filter-complexity">
+          <span class="filter-label">Уровень:</span>
+          <button class="complexity-btn" data-filter="easy">Простой</button>
+          <button class="complexity-btn" data-filter="normal">Средний</button>
+          <button class="complexity-btn" data-filter="hard">Продвинутый</button>
+          <button class="complexity-btn active" data-filter="all">Любой</button>
+        </div>
+      </div>
+    </div>
+    <div class="tile-medium-row">
+      <div class="tile-medium">
+        <h2>Теория</h2>
+        <div class="materials-list">
+          {% for book in theory_books %}
+            {% include "students/_book_item.html" with book=book %}
+          {% empty %}
+            <p>Нет теоретических материалов.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="tile-medium">
+        <h2>Задачи</h2>
+        <div class="materials-list">
+          {% for book in exercise_books %}
+            {% include "students/_book_item.html" with book=book %}
+          {% empty %}
+            <p>Нет сборников задач.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Global PDF container -->
+    <div id="pdf-viewer-container" class="pdf-container" style="display:none;">
+      <button id="collapse-btn" class="collapse-btn" style="display:none;">✖</button>
+      <iframe id="pdf-viewer" src="" width="100%" height="600" frameborder="0"></iframe>
+    </div>
+    <script>
+      // Expand descriptions
+      function toggleDescription(element) {
+        element.classList.toggle('expanded');
+      }
+      
+      document.addEventListener('DOMContentLoaded', () => {
+
+        ////////////////////
+        // PDF OPEN|CLOSE //
+        ////////////////////
+        const pdfContainer = document.getElementById('pdf-viewer-container');
+        const pdfViewer = document.getElementById('pdf-viewer');
+        const collapseBtn = document.getElementById('collapse-btn');
+
+        let currentFormat = null;
+        let activeButton = null;
+
+        function collapseViewer() {
+          pdfContainer.style.display = 'none';
+          pdfViewer.src = '';
+          collapseBtn.style.display = 'none';
+          currentFormat = null;
+
+          if (activeButton) {
+            activeButton.textContent = 'Открыть';
+            activeButton.classList.remove('active');
+            activeButton = null;
+          }
+        }
+
+        if (collapseBtn) {
+          collapseBtn.addEventListener('click', collapseViewer);
+        }
+
+        // Event delegation for "Открыть"/"Скрыть" buttons
+        document.addEventListener('click', function(e) {
+          if (!e.target.classList.contains('open-btn')) return;
+
+          const btn = e.target;
+          const item = btn.closest('.material-item');
+          const format = item.dataset.format.toLowerCase();
+
+          if (btn === activeButton) {
+            collapseViewer();
+            return;
+          }
+
+          if (currentFormat) collapseViewer();
+
+          if (format === 'pdf') {
+            pdfViewer.src = item.dataset.pdf;
+          } else if (format === 'djvu') {
+            const viewerHtml = "{% static 'djvu/djvu.viewer.html' %}";
+            pdfViewer.src = viewerHtml + '?file=' + encodeURIComponent(item.dataset.pdf);
+          }
+          pdfContainer.style.display = 'block';
+          pdfContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+          currentFormat = format;
+          collapseBtn.style.display = 'block';
+          btn.textContent = 'Скрыть';
+          btn.classList.add('active');
+          activeButton = btn;
+        });
+
+        /////////////////////
+        // CONTENT FILTERS //
+        /////////////////////
+
+        let activeComplexity = null; // store complexity separately
+
+        function applyFilters() {
+          const activeClasses = [...document.querySelectorAll('.filter-btn[data-filter].active')]
+            .filter(btn => ['6','7','8','9','10','11','college'].includes(btn.dataset.filter))
+            .map(btn => btn.dataset.filter);
+
+          const activeEras = [...document.querySelectorAll('.filter-btn[data-filter].active')]
+            .filter(btn => ['classic','modern','exams'].includes(btn.dataset.filter))
+            .map(btn => btn.dataset.filter);
+
+          const activeFormats = [...document.querySelectorAll('.filter-btn[data-filter].active')]
+            .filter(btn => ['pdf','djvu'].includes(btn.dataset.filter))
+            .map(btn => btn.dataset.filter);
+
+          document.querySelectorAll('.materials-list').forEach(section => {
+            const items = Array.from(section.querySelectorAll('.material-item'));
+            const filtered = [];
+
+            items.forEach(item => {
+              const itemClasses = item.dataset.class.split(',').map(c => c.trim());
+              const itemEras = item.dataset.era.split(',').map(c => c.trim());
+              const itemFormat = item.dataset.format;
+              const itemComplexity = parseInt(item.dataset.complexity, 10) || 0;
+
+              const matchesClass = activeClasses.length === 0 || itemClasses.some(c => activeClasses.includes(c));
+              const matchesEra = activeEras.length === 0 || itemEras.some(c => activeEras.includes(c));
+              const matchesFormat = activeFormats.length === 0 || activeFormats.includes(itemFormat);
+
+              let matchesComplexity = true;
+              if (activeComplexity === 'easy') {
+                matchesComplexity = itemComplexity <= 3;
+              } else if (activeComplexity === 'normal') {
+                matchesComplexity = itemComplexity >= 2 && itemComplexity <= 4;
+              } else if (activeComplexity === 'hard') {
+                matchesComplexity = itemComplexity >= 3;
+              }
+
+              if (matchesClass && matchesEra && matchesFormat && matchesComplexity) {
+                filtered.push(item);
+                item.style.display = ''; // show
+              } else {
+                item.style.display = 'none'; // hide
+              }
+            });
+
+            // SORTING by complexity for "easy" and "hard"
+            if (activeComplexity === 'easy') {
+              filtered.sort((a, b) =>
+                (parseInt(a.dataset.complexity, 10) || 0) -
+                (parseInt(b.dataset.complexity, 10) || 0)
+              );
+            } else if (activeComplexity === 'hard') {
+              filtered.sort((a, b) =>
+                (parseInt(b.dataset.complexity, 10) || 0) -
+                (parseInt(a.dataset.complexity, 10) || 0)
+              );
+            }
+
+            // Placeholder message if empty
+            let placeholder = section.querySelector('.no-materials-placeholder');
+            if (!placeholder) {
+              placeholder = document.createElement('p');
+              placeholder.className = 'no-materials-placeholder';
+              placeholder.textContent = 'Увы, книг под это сочетание фильтров пока нет. Напишите мне, чтобы я подыскал их и добавил.';
+              placeholder.style.display = 'none';
+              section.appendChild(placeholder);
+            }
+
+            if (filtered.length === 0) {
+              placeholder.style.display = 'block';
+            } else {
+              placeholder.style.display = 'none';
+            }
+
+            // Re-append items in new order (only if complexity filter requires it)
+            if (activeComplexity === 'easy' || activeComplexity === 'hard') {
+              filtered.forEach(item => section.appendChild(item));
+            }
+          });
+        }
+
+        // Attach class/era/format filters
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            btn.classList.toggle('active');
+            applyFilters();
+          });
+        });
+
+        // Attach complexity filters (single-choice)
+        document.querySelectorAll('.complexity-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('.complexity-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            activeComplexity = btn.dataset.filter === 'all' ? null : btn.dataset.filter;
+            applyFilters();
+          });
+        });
+
+        // Initial filter pass
+        applyFilters();
+      });
+    </script>
+  </div>
+</main>
+{% endblock %}

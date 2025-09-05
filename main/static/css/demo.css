@@ -1,0 +1,234 @@
+.demo-page {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.demo-header {
+  align-items: center;
+  justify-content: space-between;
+  height: 3em;
+  padding: 0 2em;
+}
+
+.demo-title {
+  min-width: max-content;
+  max-width: 70%;
+  font-weight: 600;
+  font-size: 1.2em;
+  padding: .5rem 1.5rem;
+}
+
+.demo-subtitle {
+  font-size: 0.85rem;
+  color: #999;
+  margin: 0;
+  white-space: normal;      /* allow wrapping */
+  overflow: hidden;         /* hide any extra if constrained */
+  text-overflow: ellipsis;  /* works only in single-line, but fine as fallback */
+  flex-shrink: 1;           /* allow it to shrink first */
+  line-height: 1.2em;
+}
+
+@media (max-width: 700px) {
+  .demo-subtitle {
+    display: none;
+  }
+}
+
+.demo-back {
+  color: #d0d0d0;
+  text-decoration: none;
+  font-size: 1.05rem;
+  position: relative;
+  padding: .3rem 1rem;
+  transition: color 0.3s ease;
+}
+.demo-back::after {
+  content: "";
+  display: block;
+  height: 2px;
+  width: 0%;
+  background-color: #96c8e0;
+  transition: width 0.3s ease;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+.demo-back:hover {
+  color: #96c8e0;
+}
+.demo-back:hover::after {
+  width: 100%;
+}
+.demo-back.active {
+  color: #96c8e0;
+  font-weight: bold;
+  border-bottom: 2px solid #96c8e0;
+}
+.demo-page-content {
+  display: flex;
+  flex-direction: row;       /* horizontal layout */
+  margin: 0 auto;            /* center on page */
+  box-sizing: border-box;
+  width: 100%;
+  flex: 1;
+  overflow: hidden;
+}
+.sidebar {
+  flex: 1 2 240px;
+  height: 100%;
+  background-color: #2a2d3a;
+  padding: 2em;
+}
+.demo-essentials {
+  display: flex;
+  flex-direction: row;
+  background-color: #2a2d3a;
+  border-radius: 12px 12px 0 0;
+  padding: 1em;
+  margin: 1em 1em 0 1em;
+  min-height: 0;
+  flex: 2 1 1200px; /* it will flex with the page, but not because of the separator */
+  overflow: hidden; /* keep it neat */
+}
+
+.action-section {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 60%;
+  min-width: 100px; /* to prevent collapse */
+  overflow: hidden;
+}
+
+.demo-canvas-area {
+  min-width: 320px;
+  overflow: hidden;
+  background-color: #1a1b1f;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;    /* stick canvas to the top */
+  aspect-ratio: 8 / 5;        /* enforce 8:5 by default */
+}
+.demo-container {
+  height: 100%;
+  aspect-ratio: 8 / 5;
+  display: flex;
+  background-color: #111; /* dark background */
+  overflow: hidden;
+}
+
+.demo-controls {
+  flex: 0 1 auto;
+  min-height: 150px; /* This will become MIN_CONTROLS_H in JS */
+  overflow: auto;
+  background-color: #2a2d3a;
+  padding: 1em;
+}
+
+.description-section {
+  flex: 1 1 250px;
+  min-width: 250px;
+  overflow: auto;
+  padding: 1em;
+}
+
+.description-section h3[id^="scene-"] {
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.description-section h3[id^="scene-"]:hover {
+  color: #b9e0f1;
+}
+
+.description-section h3.hover {
+  color: #b9e0f1;
+}
+
+.description-section h3[id^="scene-"] {
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s ease;
+  display:inline;
+}
+
+.description-section h3[id^="scene-"]::after {
+  content: '';
+  position: absolute;
+  display: block;
+  left: 0;
+  bottom: 0px;
+  width: 0;
+  height: 2px;
+  background-color: #e0e0e0;
+  transition: width 0.3s ease;
+}
+
+.description-section h3.active-scene {
+  color: #b9e0f1;
+  font-weight: 720;
+}
+
+.description-section h3[id^="scene-"].in-view::after,
+.description-section h3.active-scene::after {
+  width: 100%;
+}
+
+.description-section h3:hover::after,
+.description-section h3.active-scene::after {
+  background-color: #b9e0f1;
+  height: 2px;
+}
+
+.resizer {
+  flex: 0 0 5px;
+  cursor: col-resize;
+  background-color: #232538;
+  border-left: 1px solid #bbb;
+  border-right: 1px solid #bbb;
+  position: relative;
+}
+
+.resizer::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 40px;
+  background: #bbb;
+  border-radius: 2px;
+  transform: translate(-50%, -50%);
+}
+
+.resizer:hover::before {
+  background: #96c8e0;
+}
+
+.contact-fab {
+  left:1em;
+}
+
+@media (max-width: 1200px) {
+  .sidebar {
+    display: none;
+  }
+}
+/* Nice UX while dragging */
+body.resizing-y{
+  cursor: row-resize !important;
+  user-select: none !important;
+}
+
+@media (max-width: 900px) or (max-height:700px) {
+  .demo-essentials {
+    margin: .5em .5em 0 .5em;
+    padding: .5em;
+}
+  .demo-section-separator {
+    margin: .5em 0;
+  }
+}
+

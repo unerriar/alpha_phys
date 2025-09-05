@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Главная{% endblock %}
+
+{% block nav %}
+<nav class="topnav">
+  <a href="/parents/about/">Для родителей</a>
+  <a href="/students/materials/">Для учеников</a>
+</nav>
+{% endblock %}
+
+{% block content %}
+<main class="fade-in">
+  <div class="page-content">
+
+    <div class="tile-wide">
+      <h2>Кузнецов Н.Ю.</h2>
+      <p>
+      Я занимаюсь частным преподаванием физики для школьников любых классов,
+      а также студентов младших курсов профильных вузов с 2015 года. На этом
+      сайте вы можете найти всю интересующую вас информацию обо мне и условиях
+      моих занятий, а также большое количество полезных материалов по физике,
+      как за моим авторством, так и более опытных предшественников.
+      </p>
+        
+      <div class="contact-inline">
+        <span class="label">Контакты:</span>
+
+        <a href="mailto:unerriar@gmail.com" class="contact-item">
+          <img src="{% static 'images/email.svg' %}" alt="Email">
+          <span>unerriar@gmail.com</span>
+        </a>
+
+        <a href="https://t.me/unerriar" target="_blank" class="contact-item">
+          <img src="{% static 'images/telegram.png' %}" alt="Telegram">
+          <span>@unerriar</span>
+        </a>
+
+        <a href="https://wa.me/79031488319" target="_blank" class="contact-item">
+          <img src="{% static 'images/whatsapp.png' %}" alt="WhatsApp">
+          <span>+79031488319</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="tile-medium-row">
+      <div class="tile-medium">
+        <h3><a href="/parents/about">
+          Раздел для родителей
+        </a></h3>
+        <p>Если вас интересует информация обо мне, формат проведения занятий,
+          их стоимость и текущие окна в расписании.
+        </p>
+      </div>
+      <div class="tile-medium">
+        <h3><a href="/students/materials">
+          Раздел для учеников
+        </a></h3>
+        <p>Если вы хотите приступить непосредственно к учёбе и ищете полезные материалы.
+        </p>
+      </div>
+    </div>
+  </div>
+
+</main>
+{% endblock %}

@@ -1,0 +1,275 @@
+{% extends "base.html" %}
+{% load static %}
+{% load demo_loader %}
+
+{% block extrahead %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/demo.css' %}?v=0.31">
+<link rel="stylesheet" type="text/css" href="{% static 'demos/'|add:demo.slug|add:'/style.css' %}?v=0.2"></link>
+{% endblock %}
+
+{% block title %}{{ demo.title }}{% endblock %}
+
+{% block content %}
+<main class="fade-in">
+  <div class="demo-page">
+    <nav class="demo-header">
+      <span class="demo-title">
+        {{ demo.title }}
+      </span>
+      {% if demo.description %}
+        <p class="demo-subtitle">{{ demo.description }}</p>
+      {% endif %}
+      <a href="{% url 'demos' %}" class="demo-back">Назад</a>
+    </nav>
+    <div class="demo-page-content">
+      <section class="sidebar fade-in">
+        <h3>Похожие демонстрации</h3>
+        <p>Здесь будут рекомендации и ссылки. При недостатке пространства, они исчезают в первую очередь.</p>
+      </section>
+      <div class="demo-essentials" id="demo-essentials">
+        <!-- Здесь будут элементы демонстрации, которые нельзя опустить при нехватке пространства. -->
+        <section class="action-section" id="action-section">
+          <div class="demo-canvas-area" id="demo-canvas-area">
+            <div class="demo-container" id="demo-container">
+              <canvas id="canvas"></canvas>
+              <div id="plots"></div>
+            </div>
+          </div>
+          <section class="demo-controls">
+            <label for="scene-selector">Сцена:</label>
+            <select id="scene-selector">
+              {% for scene in demo.scenes.all %}
+                <option value="{{ scene.theory_id }}">{{ scene.title }}</option>
+              {% endfor %}
+            </select>
+            {% load_demo_part demo.slug 'controls' %}
+          </section>
+        </section>
+        <div class="resizer" id="resizer"></div>
+        <section class="description-section">
+          {% load_demo_part demo.slug 'theory' %}
+        </section>
+      </div>
+    </div>
+  </div>
+  
+  {% if demo.script_static %}
+    <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+    <script src="{% static 'demos/'|add:demo.slug|add:'/script.js' %}?v=0.10"></script>
+  {% endif %}
+  <script>
+    // === Global resize manager for demos ===
+    // Usage: In each demo, define:
+    //   window.ENABLE_PLOTLY_RESIZE = true; // or false
+    //
+    // This script will:
+    // - Manage the vertical resizer (id="resizer")
+    // - Maintain 8:5 aspect ratio for #demo-canvas-area
+    // - Dynamically resize Plotly plots if enabled
+
+    // Global constants
+    const MIN_ACTION_W = 300;   // Minimum width for action-section in px
+    const MIN_THEORY_W = 250;   // Minimum width for description-section in px
+    const MIN_CONTROLS_H = 150; // Minimum height reserved for controls in px
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizer = document.getElementById('resizer');
+      const container = document.getElementById('demo-essentials');
+      const action = document.getElementById('action-section');
+
+      let isResizing = false;
+      let currentActionWidth = action.offsetWidth;
+
+      // Start resizing
+      resizer.addEventListener('mousedown', () => { isResizing = true; });
+
+      // Stop resizing
+      window.addEventListener('mouseup', () => { isResizing = false; });
+
+      // Handle dragging
+      window.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+
+        const containerRect = container.getBoundingClientRect();
+        let newActionWidth = e.clientX - containerRect.left;
+
+        // Clamp action section width
+        const maxActionWidth = containerRect.width - MIN_THEORY_W;
+        newActionWidth = Math.min(Math.max(newActionWidth, MIN_ACTION_W), maxActionWidth);
+
+        currentActionWidth = newActionWidth;
+        action.style.flex = `0 0 ${currentActionWidth}px`;
+
+        adjustLayout();
+      });
+
+      // Handle window resize
+      window.addEventListener('resize', () => {
+        const containerRect = container.getBoundingClientRect();
+        const maxActionWidth = containerRect.width - MIN_THEORY_W;
+
+        currentActionWidth = Math.min(Math.max(currentActionWidth, MIN_ACTION_W), maxActionWidth);
+        action.style.flex = `0 0 ${currentActionWidth}px`;
+
+        adjustLayout();
+      });
+
+      // Initial adjustment
+      adjustLayout();
+    });
+
+    /**
+    * Adjusts the canvas and plots area based on the container layout.
+    * - Keeps canvas in 8:5 aspect ratio when needed.
+    * - Resizes Plotly plots only if window.ENABLE_PLOTLY_RESIZE is true.
+    */
+    function adjustLayout() {
+      const actionSection = document.getElementById('action-section');
+      const canvasArea = document.getElementById('demo-canvas-area');
+
+      if (!actionSection || !canvasArea) return;
+
+      const naturalHeight = canvasArea.offsetHeight;
+      const totalHeight = actionSection.offsetHeight;
+      const maxCanvasHeight = totalHeight - MIN_CONTROLS_H;
+
+      if (naturalHeight > maxCanvasHeight) {
+        const maxWidth = maxCanvasHeight * (8 / 5);
+        canvasArea.style.height = `${maxCanvasHeight}px`;
+        canvasArea.style.width = `${maxWidth}px`;
+      } else {
+        canvasArea.style.height = '';
+        canvasArea.style.width = '';
+      }
+
+      // Conditionally resize Plotly plots
+      if (window.ENABLE_PLOTLY_RESIZE) {
+        const plots = document.getElementById('plots');
+        if (plots && window.Plotly) {
+          Plotly.Plots.resize(plots);
+        }
+      }
+    }
+  </script>
+  <script>
+    const theoryContainer = document.querySelector('.description-section');
+    const sceneSelector = document.getElementById('scene-selector');
+    const sceneHeaders = Array.from(theoryContainer.querySelectorAll('h3[id^="scene-"]'));
+
+    const SCENE_HIGHLIGHT_TOP = 10;
+    const SCENE_HIGHLIGHT_BOTTOM = 200;
+
+    /**
+    * Scroll theory container to the specified scene.
+    */
+    function scrollToScene(sceneId) {
+      const header = document.getElementById(sceneId);
+      if (!header) return;
+
+      const containerTop = theoryContainer.getBoundingClientRect().top;
+      const elementTop = header.getBoundingClientRect().top;
+      const scrollOffset = elementTop - containerTop + theoryContainer.scrollTop;
+
+      theoryContainer.scrollTo({
+        top: scrollOffset,
+        behavior: 'smooth'
+      });
+    }
+
+    /**
+    * Set the active scene visually and update URL hash (optional).
+    */
+    function setActiveScene(sceneId, updateUrl = true) {
+      sceneHeaders.forEach(header =>
+        header.classList.toggle('active-scene', header.id === sceneId)
+      );
+
+      if (updateUrl) {
+        history.replaceState(null, '', `#${sceneId}`);
+      }
+
+      if (sceneSelector) {
+        sceneSelector.value = sceneId;
+      }
+    }
+
+    /**
+    * Change the scene programmatically.
+    */
+    function changeScene(sceneId, updateUrl = true) {
+      setActiveScene(sceneId, updateUrl);
+      scrollToScene(sceneId);
+    }
+
+    /**
+    * Initialize the scene selector with available headers.
+    */
+    function populateSceneSelector() {
+      if (!sceneSelector) return;
+      sceneHeaders.forEach(sec => {
+        const option = document.createElement('option');
+        option.value = sec.id;
+        option.textContent = sec.textContent.split('\n')[0]; // first line as title
+        sceneSelector.appendChild(option);
+      });
+    }
+
+    /**
+    * Handle scene selection change.
+    */
+    if (sceneSelector) {
+      sceneSelector.addEventListener('change', (e) => {
+        changeScene(e.target.value);
+      });
+    }
+
+    /**
+    * Make <h3> headers clickable for scene selection.
+    */
+    sceneHeaders.forEach(header => {
+      header.addEventListener('click', () => {
+        changeScene(header.id);
+      });
+    });
+
+    /**
+    * Handle deep link on initial load.
+    */
+    window.addEventListener('DOMContentLoaded', () => {
+      populateSceneSelector();
+      const initialScene = location.hash.replace('#', '') || (sceneSelector ? sceneSelector.value : null);
+      if (initialScene) {
+        changeScene(initialScene, false);
+      }
+    });
+
+    /**
+    * Handle deep link changes after load.
+    */
+    window.addEventListener('hashchange', () => {
+      const newScene = location.hash.replace('#', '');
+      if (newScene) {
+        changeScene(newScene);
+      }
+    });
+
+    /**
+    * Highlight headers near the top of the view.
+    */
+    theoryContainer.addEventListener('scroll', () => {
+      const containerRect = theoryContainer.getBoundingClientRect();
+
+      sceneHeaders.forEach(header => {
+        const offsetFromContainerTop = header.getBoundingClientRect().top - containerRect.top;
+        if (offsetFromContainerTop <= SCENE_HIGHLIGHT_BOTTOM &&
+            offsetFromContainerTop >= SCENE_HIGHLIGHT_TOP) {
+          header.classList.add('in-view');
+        } else {
+          header.classList.remove('in-view');
+        }
+      });
+    });
+  </script>
+</main>
+
+{% endblock %}

@@ -1,0 +1,16 @@
+<div class="controls">
+  <button id="play-pause-btn">Старт</button>
+  <button id="reload-btn">Перезапуск</button>
+  <label>Начальная координата x₀ (м):
+    <input type="range" id="x0-slider" min="-5" max="5" step="0.1" value="0">
+  </label>
+  <label>Скорость v (м/с):
+    <input type="range" id="v-slider" min="-5" max="5" step="0.1" value="1">
+  </label>
+</div>
+
+<table id="values-table" style="color:white; font-family:sans-serif; margin-top:10px;">
+  <tr><td>Начальная координата x₀:</td><td id="val-x0"></td></tr>
+  <tr><td>Скорость v:</td><td id="val-v"></td></tr>
+  <tr><td>Текущая координата x:</td><td id="val-x"></td></tr>
+</table>

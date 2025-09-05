@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extrahead %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/demo.css' %}?v=0.9">
+{% endblock %}
+
+{% block title %}{{ demo.title }}{% endblock %}
+
+{% block content %}
+<main class="fade-in">
+  <div class="demo-page">
+
+    <!-- Top Navigation Bar -->
+    <nav class="demo-header">
+      <span class="demo-title">
+        {{ demo.title }}
+      </span>
+      {% if demo.description %}
+        <p class="demo-subtitle">{{ demo.description }}</p>
+      {% endif %}
+      <a href="{% url 'demos' %}" class="demo-back">Назад</a>
+    </nav>
+
+    <!-- Central Area -->
+    <div class="demo-page-content">
+      <!-- Left Navigation -->
+      <section class="sidebar" id="demo-left">
+        <div class="demo-left-content">
+          <h3>Похожие демонстрации</h3>
+          <p class="muted">Здесь будут рекомендации и ссылки.</p>
+        </div>
+      </section>
+
+      <!-- Central Area -->
+      <div class="demo-main-wrapper">
+        <section class="demo-main">
+          <!-- Canvas Area -->
+          <div class="demo-canvas-area">
+            <canvas id="demo-canvas"></canvas>
+          </div>
+          <!-- Theory Tile -->
+          <div class="tile-wide" id="theory-tile">
+            <h3>Теория</h3>
+            <p>Здесь будет важная теория, которую можно прокручивать независимо.</p>
+          </div>
+        </section>
+      </div>
+        
+      <!-- Control Bar -->
+      <section class="sidebar" id="control-bar">
+        <h3>Управление</h3>
+        <button id="btnStart">Старт</button>
+        <button id="btnPause">Пауза</button>
+        <button id="btnReset">Сброс</button>
+      </section>
+    </div>
+
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const canvas = document.getElementById('demo-canvas');
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height;
+
+      // simple placeholder renderer
+      function drawPlaceholder() {
+        ctx.clearRect(0,0,W,H);
+        ctx.fillStyle = '#1f2330';
+        ctx.fillRect(0,0,W,H);
+
+        // grid
+        ctx.strokeStyle = '#3a3f52';
+        ctx.lineWidth = 1;
+        for (let x=0; x<=W; x+=30) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+        for (let y=0; y<=H; y+=30) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+        ctx.fillStyle = '#d8d8d8';
+        ctx.font = '16px sans-serif';
+        ctx.fillText('Заглушка демонстрации: {{ demo.title }}', 20, 30);
+        ctx.fillText('Здесь появится анимация и управление.', 20, 54);
+      }
+
+      let running = false;
+      let t = 0, raf;
+
+      function render(ts) {
+        drawPlaceholder();
+
+        // simple animated marker as “alive” indicator
+        const r = 12;
+        const cx = 60 + 40*Math.sin(t*0.002);
+        const cy = 90 + 40*Math.cos(t*0.002);
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI*2);
+        ctx.fillStyle = '#8bd1ff';
+        ctx.fill();
+
+        t = ts;
+        if (running) raf = requestAnimationFrame(render);
+      }
+
+      document.getElementById('btnStart').addEventListener('click', () => {
+        if (!running) { running = true; raf = requestAnimationFrame(render); }
+      });
+      document.getElementById('btnPause').addEventListener('click', () => {
+        running = false; if (raf) cancelAnimationFrame(raf);
+      });
+      document.getElementById('btnReset').addEventListener('click', () => {
+        running = false; if (raf) cancelAnimationFrame(raf); t = 0; drawPlaceholder();
+      });
+
+      // initial
+      drawPlaceholder();
+    });
+  </script>
+</main>
+
+{% endblock %}
